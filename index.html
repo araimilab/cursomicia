@@ -4,14 +4,262 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Mini Campus: Reto Tesis en 30 Días</title>
-  <!-- Estilos -->
-  <link rel="stylesheet" href="css/styles.css">
-  <!-- Librerías externas -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <!-- Configuración -->
-  <script src="js/config.js"></script>
-  <!-- Contenido -->
-  <script src="data/lessons.js"></script>
+  <style>
+    :root {
+      --primary: #1a365d;
+      --secondary: #2b6cb0;
+      --accent: #4299e1;
+      --light: #f7fafc;
+      --text: #2d3748;
+      --sidebar-bg: #edf2f7;
+      --content-bg: white;
+      --ia-orange: #fe5e14;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--light);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Barra de progreso */
+    .progress-container {
+      width: 100%;
+      background: #e2e8f0;
+      height: 10px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* Layout principal */
+    .main-layout {
+      display: flex;
+      flex: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Barra lateral */
+    .sidebar {
+      width: 280px;
+      background: var(--sidebar-bg);
+      padding: 20px 15px;
+      overflow-y: auto;
+      height: calc(100vh - 40px);
+      position: sticky;
+      top: 40px;
+      border-right: 1px solid #cbd5e0;
+    }
+    .module-header {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--primary);
+      margin: 20px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--accent);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .module-content {
+      display: none;
+    }
+    .module-content.active {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .lesson-item {
+      padding: 8px 15px;
+      margin: 4px 0;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+    .lesson-item:hover {
+      background: #dbeafe;
+    }
+    .lesson-item.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    /* Contenido central */
+    .content-area {
+      flex: 1;
+      padding: 30px;
+      background: var(--content-bg);
+      overflow-y: auto;
+      height: calc(100vh - 40px);
+    }
+    .content-title {
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+    .lesson-content {
+      display: none;
+    }
+    .lesson-content.active {
+      display: block;
+      animation: slideIn 0.4s;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .lesson-header h2 {
+      color: var(--secondary);
+      margin-bottom: 15px;
+      font-size: 1.6rem;
+    }
+    .lesson-text p {
+      margin-bottom: 15px;
+      line-height: 1.7;
+    }
+    .definition {
+      font-style: italic;
+      background: #f0f7ff;
+      border-left: 4px solid var(--secondary);
+      padding: 12px 15px;
+      margin: 15px 0;
+      border-radius: 0 6px 6px 0;
+    }
+    .citation {
+      font-style: italic;
+      color: var(--secondary);
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+
+    /* Sección de IA */
+    .ia-section {
+      margin: 25px 0;
+      padding: 20px;
+      background: #fff9f0;
+      border: 1px solid #fedcc5;
+      border-radius: 8px;
+    }
+    .ia-columns {
+      display: flex;
+      gap: 20px;
+      margin-top: 15px;
+    }
+    .ia-column {
+      flex: 1;
+    }
+    .ia-column h4 {
+      color: var(--ia-orange);
+      margin-bottom: 10px;
+    }
+    textarea.ia-prompt {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+      margin-bottom: 10px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-copy, .btn-reset {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .btn-copy {
+      background: var(--ia-orange);
+      color: white;
+    }
+    .btn-reset {
+      background: #6c757d;
+      color: white;
+    }
+
+    /* Notas personales */
+    .notes-section {
+      margin: 25px 0;
+      padding: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+    }
+    .notes-section textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: inherit;
+      resize: vertical;
+      margin-top: 10px;
+    }
+
+    /* Navegación inferior */
+    .nav-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+    .nav-btn {
+      padding: 10px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .nav-btn:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #4a5568;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 300px;
+        position: relative;
+        top: 0;
+      }
+      .ia-columns {
+        flex-direction: column;
+      }
+    }
+  </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -23,34 +271,1503 @@
 <!-- Layout principal -->
 <div class="main-layout">
   
-  <!-- Barra lateral -->
-  <aside class="sidebar" id="sidebar">
-    <!-- Se generará dinámicamente -->
+  <!-- Barra lateral: Módulos y lecciones -->
+  <aside class="sidebar">
+    <div class="module" data-module="1">
+      <div class="module-header" onclick="toggleModule(1)">
+        <span>Módulo 1: Planteamiento</span>
+        <span>▼</span>
+      </div>
+      <div class="module-content" id="module1">
+        <div class="lesson-item" data-day="1" onclick="showLesson(1)">Día 1: Ideas de investigación</div>
+        <div class="lesson-item" data-day="2" onclick="showLesson(2)">Día 2: Objeto de estudio</div>
+        <div class="lesson-item" data-day="3" onclick="showLesson(3)">Día 3: Espacio temporal</div>
+        <div class="lesson-item" data-day="4" onclick="showLesson(4)">Día 4: Tipo de estudio</div>
+        <div class="lesson-item" data-day="5" onclick="showLesson(5)">Día 5: Enfoque del estudio</div>
+        <div class="lesson-item" data-day="6" onclick="showLesson(6)">Día 6: Planteamiento del problema</div>
+        <div class="lesson-item" data-day="7" onclick="showLesson(7)">Día 7: Objetivos</div>
+      </div>
+    </div>
+
+    <div class="module" data-module="2">
+      <div class="module-header" onclick="toggleModule(2)">
+        <span>Módulo 2: Marco teórico</span>
+        <span>▼</span>
+      </div>
+      <div class="module-content" id="module2">
+        <div class="lesson-item" data-day="8" onclick="showLesson(8)">Día 8: Antecedentes</div>
+        <div class="lesson-item" data-day="9" onclick="showLesson(9)">Día 9: Paradigmas</div>
+        <div class="lesson-item" data-day="10" onclick="showLesson(10)">Día 10: Fundamentación</div>
+        <div class="lesson-item" data-day="11" onclick="showLesson(11)">Día 11: Marco teórico</div>
+        <div class="lesson-item" data-day="12" onclick="showLesson(12)">Día 12: Síntesis de antecedentes</div>
+        <div class="lesson-item" data-day="13" onclick="showLesson(13)">Día 13: Operacionalización</div>
+        <div class="lesson-item" data-day="14" onclick="showLesson(14)">Día 14: Redacción del marco</div>
+      </div>
+    </div>
+
+    <div class="module" data-module="3">
+      <div class="module-header" onclick="toggleModule(3)">
+        <span>Módulo 3: Metodología</span>
+        <span>▼</span>
+      </div>
+      <div class="module-content" id="module3">
+        <div class="lesson-item" data-day="15" onclick="showLesson(15)">Día 15: Diseño metodológico</div>
+        <div class="lesson-item" data-day="16" onclick="showLesson(16)">Día 16: Población y muestra</div>
+        <div class="lesson-item" data-day="17" onclick="showLesson(17)">Día 17: Ética en investigación</div>
+        <div class="lesson-item" data-day="18" onclick="showLesson(18)">Día 18: Análisis de resultados</div>
+        <div class="lesson-item" data-day="19" onclick="showLesson(19)">Día 19: Discusión</div>
+        <div class="lesson-item" data-day="20" onclick="showLesson(20)">Día 20: Validez y rigor</div>
+        <div class="lesson-item" data-day="21" onclick="showLesson(21)">Día 21: Instrumentos</div>
+        <div class="lesson-item" data-day="22" onclick="showLesson(22)">Día 22: Procedimientos</div>
+      </div>
+    </div>
+
+    <div class="module" data-module="4">
+      <div class="module-header" onclick="toggleModule(4)">
+        <span>Módulo 4: Redacción y cierre</span>
+        <span>▼</span>
+      </div>
+      <div class="module-content" id="module4">
+        <div class="lesson-item" data-day="23" onclick="showLesson(23)">Día 23: Estructura del informe</div>
+        <div class="lesson-item" data-day="24" onclick="showLesson(24)">Día 24: Título y resumen</div>
+        <div class="lesson-item" data-day="25" onclick="showLesson(25)">Día 25: Normas APA</div>
+        <div class="lesson-item" data-day="26" onclick="showLesson(26)">Día 26: Tablas y anexos</div>
+        <div class="lesson-item" data-day="27" onclick="showLesson(27)">Día 27: Coherencia global</div>
+        <div class="lesson-item" data-day="28" onclick="showLesson(28)">Día 28: Autoedición</div>
+        <div class="lesson-item" data-day="29" onclick="showLesson(29)">Día 29: Diario de aprendizaje</div>
+        <div class="lesson-item" data-day="30" onclick="showLesson(30)">Día 30: Entrega final</div>
+      </div>
+    </div>
   </aside>
 
   <!-- Contenido central -->
   <main class="content-area">
     <h1 class="content-title">🎓 Mini Campus: Reto Tesis en 30 Días</h1>
-    <p id="campusDescription">Presentación teórica completa para docentes y estudiantes avanzados. Basado en las referencias clásicas de metodología de la investigación.</p>
+    <p>Presentación teórica completa para docentes y estudiantes avanzados. Basado en las referencias clásicas de metodología de la investigación.</p>
 
-    <!-- Contenido de lecciones -->
-    <div id="lessonsContainer"></div>
+    <!-- Lección 1: Ideas de investigación -->
+    <div class="lesson-content active" id="lesson-1">
+      <div class="lesson-header"><h2>Día 1: Ideas de investigación</h2></div>
+      <div class="lesson-text">
+        <p>La investigación científica inicia con una <strong>idea preliminar</strong>, que puede surgir de la experiencia personal, la observación sistemática, la lectura de literatura especializada o la práctica profesional. Según Hernández Sampieri, Fernández Collado y Baptista Lucio (2014), las ideas no necesitan ser novedosas, pero sí deben cumplir con tres criterios esenciales: <em>viabilidad, relevancia y ética</em>.</p>
+        <div class="definition">
+          “Una idea de investigación es el primer acercamiento a un fenómeno que se desea estudiar, aún sin delimitar ni formular como problema científico.” (Hernández Sampieri et al., 2014, p. 58)
+        </div>
+        <p>El rol del docente es orientar al estudiante a transformar esa chispa inicial en una pregunta investigable, evitando temas demasiado amplios (“la educación en América Latina”) o ambiguos (“el amor en los jóvenes”). La idea debe ser suficientemente específica para permitir su desarrollo en el marco de una tesis de grado o posgrado.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Genera tus ideas</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-1" data-original="Genera 3 ideas de investigación cuantitativa en [área] que puedan medirse estadísticamente y responder a relaciones causales o correlacionales.">Genera 3 ideas de investigación cuantitativa en [área] que puedan medirse estadísticamente y responder a relaciones causales o correlacionales.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-1')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-1')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-1" data-original="Propón 3 ideas de investigación cualitativa en [área] centradas en comprender significados, experiencias o procesos sociales desde la perspectiva de los participantes.">Propón 3 ideas de investigación cualitativa en [área] centradas en comprender significados, experiencias o procesos sociales desde la perspectiva de los participantes.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-1')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-1')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notas personales -->
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-1" placeholder="Escribe aquí tus reflexiones sobre tu idea de investigación..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 2: Objeto de estudio -->
+    <div class="lesson-content" id="lesson-2">
+      <div class="lesson-header"><h2>Día 2: Objeto de estudio</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>objeto de estudio</strong> es el fenómeno, grupo, proceso o problema que se analizará en la investigación. Su correcta delimitación es fundamental para evitar dispersiones conceptuales y metodológicas. Bisquerra (2009) señala que toda investigación debe responder a tres preguntas básicas: ¿<em>qué</em> se estudia?, ¿<em>dónde</em> ocurre? y ¿<em>cuándo</em> se desarrolla?</p>
+        <div class="definition">
+          “Delimitar el objeto implica especificar con precisión el contenido, el contexto espacial y el marco temporal del estudio, lo que permite enfocar el diseño metodológico.” (Bisquerra, 2009, p. 72)
+        </div>
+        <p>Sin esta delimitación, el estudiante corre el riesgo de abordar un tema inmanejable, lo que puede derivar en frustración, pérdida de tiempo o resultados superficiales. Por ejemplo, en lugar de “estrés en estudiantes”, se debe delimitar a “estrés académico en estudiantes de primer semestre de Psicología de la Universidad X durante el periodo 2026-I”.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Define tu objeto</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-2" data-original="Define el objeto de estudio de una investigación cuantitativa sobre [tema], enfocándote en fenómenos observables, medibles y replicables.">Define el objeto de estudio de una investigación cuantitativa sobre [tema], enfocándote en fenómenos observables, medibles y replicables.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-2')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-2')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-2" data-original="Describe el objeto de estudio de una investigación cualitativa sobre [tema], centrándote en prácticas, narrativas, contextos o construcciones sociales.">Describe el objeto de estudio de una investigación cualitativa sobre [tema], centrándote en prácticas, narrativas, contextos o construcciones sociales.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-2')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-2')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-2" placeholder="Escribe aquí tu propuesta de objeto de estudio..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 3: Espacio temporal -->
+    <div class="lesson-content" id="lesson-3">
+      <div class="lesson-header"><h2>Día 3: Espacio temporal</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>espacio temporal</strong> define el período en que ocurre o se estudiará el fenómeno. Hernández Sampieri et al. (2014) destacan que este límite no solo organiza la recolección de datos, sino que contextualiza los hallazgos dentro de condiciones históricas, sociales o institucionales específicas.</p>
+        <p>Por ejemplo, estudiar el uso de redes sociales en adolescentes en 2020 (durante el confinamiento global) tiene implicaciones distintas que hacerlo en 2025 (en un contexto post-pandémico). El marco temporal también influye en la disponibilidad de participantes, la pertinencia de los instrumentos y la interpretación de los resultados. Por tanto, debe justificarse con base en la naturaleza del fenómeno y los objetivos del estudio.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Especifica tu marco</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-3" data-original="Propón un marco temporal (transversal/longitudinal) y espacial para una investigación cuantitativa sobre [tema].">Propón un marco temporal (transversal/longitudinal) y espacial para una investigación cuantitativa sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-3')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-3')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-3" data-original="Describe cómo abordarías la dimensión espacio-temporal en un estudio cualitativo sobre [fenómeno], considerando contexto y duración del proceso.">Describe cómo abordarías la dimensión espacio-temporal en un estudio cualitativo sobre [fenómeno], considerando contexto y duración del proceso.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-3')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-3')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-3" placeholder="Especifica aquí tu delimitación espacio-temporal..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 4: Tipo de estudio -->
+    <div class="lesson-content" id="lesson-4">
+      <div class="lesson-header"><h2>Día 4: Tipo de estudio</h2></div>
+      <div class="lesson-text">
+        <p>Los estudios se clasifican en tres grandes categorías según su propósito (Hernández Sampieri et al., 2014):</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Exploratorios</strong>: cuando el tema es poco estudiado y se busca familiarizarse con él.</li>
+          <li><strong>Descriptivos</strong>: cuando se desea caracterizar variables, fenómenos o perfiles.</li>
+          <li><strong>Correlacionales</strong>: cuando se desea correlacionar variables, para observar si existen relación de causa efecto.</li>
+          <li><strong>Explicativos</strong>: cuando se analizan relaciones causales o correlacionales entre variables.</li>
+        </ul>
+        <p>Esta clasificación orienta el diseño metodológico, las técnicas de recolección y el análisis de datos. Un error común es plantear un estudio explicativo sin tener un conocimiento previo descriptivo del fenómeno. La secuencia lógica suele ser: explorar → describir → explicar.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Justifica tu diseño</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-4" data-original="Justifica por qué un diseño [experimental, cuasi-experimental, correlacional, descriptivo] es el más adecuado para responder a mi pregunta cuantitativa sobre [tema].">Justifica por qué un diseño [experimental, cuasi-experimental, correlacional, descriptivo] es el más adecuado para responder a mi pregunta cuantitativa sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-4')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-4')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-4" data-original="Justifica por qué un enfoque [etnográfico, fenomenológico, estudio de caso, teoría fundamentada] es el más pertinente para explorar [fenómeno] en [contexto].">Justifica por qué un enfoque [etnográfico, fenomenológico, estudio de caso, teoría fundamentada] es el más pertinente para explorar [fenómeno] en [contexto].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-4')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-4')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-4" placeholder="Escribe aquí la justificación de tu tipo de estudio..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 5: Enfoque del estudio -->
+    <div class="lesson-content" id="lesson-5">
+      <div class="lesson-header"><h2>Día 5: Enfoque del estudio</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>enfoque metodológico</strong> (cuantitativo, cualitativo o mixto) responde a la postura epistemológica del investigador sobre la naturaleza de la realidad y la forma de conocerla. Según Creswell (2013):</p>
+        <div class="definition">
+          “El enfoque cuantitativo asume una realidad objetiva y busca generalizar resultados mediante mediciones numéricas; el cualitativo parte de una realidad subjetiva y construida socialmente, y busca comprender significados en contextos naturales; el mixto integra ambos para enriquecer la comprensión del fenómeno.” (Creswell, 2013, p. 18)
+        </div>
+        <p>La elección del enfoque determina las técnicas, instrumentos, formas de muestreo y estrategias de análisis. Debe ser coherente con el paradigma asumido (positivista, interpretativo o crítico) y con los objetivos del estudio.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Argumenta tu elección</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-5" data-original="Recomienda un enfoque cuantitativo para [tema] y justifica su pertinencia según el paradigma post-positivista.">Recomienda un enfoque cuantitativo para [tema] y justifica su pertinencia según el paradigma post-positivista.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-5')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-5')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-5" data-original="Argumenta por qué un enfoque cualitativo es el más adecuado para explorar [fenómeno], desde una perspectiva constructivista.">Argumenta por qué un enfoque cualitativo es el más adecuado para explorar [fenómeno], desde una perspectiva constructivista.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-5')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-5')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-5" placeholder="Escribe aquí tu justificación del enfoque elegido..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 6: Planteamiento del problema -->
+    <div class="lesson-content" id="lesson-6">
+      <div class="lesson-header"><h2>Día 6: Planteamiento del problema</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>problema de investigación</strong> es la formulación clara, precisa y concreta de la duda que se desea resolver. Hernández Sampieri et al. (2014) exigen que cumpla tres condiciones:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Empírico</strong>: susceptible de observación o medición.</li>
+          <li><strong>Específico</strong>: no ambiguo, ni vago.</li>
+          <li><strong>Relevante</strong>: con valor teórico, práctico o social.</li>
+        </ul>
+        <p>Debe expresarse como una pregunta y derivar en problemas específicos que desglosen su complejidad. Por ejemplo, si el problema general es “¿Cómo influyen las estrategias de autocuidado en el bienestar emocional de estudiantes universitarios?”, los específicos podrían ser: 1) ¿Qué estrategias utilizan?, 2) ¿Cuál es su nivel de bienestar?, 3) ¿Existe asociación entre ambas variables?</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Formula tu problema</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-6" data-original="Formula un problema de investigación cuantitativo sobre [tema] que permita probar hipótesis o identificar relaciones entre variables.">Formula un problema de investigación cuantitativo sobre [tema] que permita probar hipótesis o identificar relaciones entre variables.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-6')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-6')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-6" data-original="Formula un problema de investigación cualitativo sobre [tema] que explore cómo, por qué o qué significa un fenómeno para los actores involucrados.">Formula un problema de investigación cualitativo sobre [tema] que explore cómo, por qué o qué significa un fenómeno para los actores involucrados.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-6')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-6')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-6" placeholder="Escribe aquí tu planteamiento del problema..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 7: Planteamiento de objetivos -->
+    <div class="lesson-content" id="lesson-7">
+      <div class="lesson-header"><h2>Día 7: Planteamiento de objetivos</h2></div>
+      <div class="lesson-text">
+        <p>Los <strong>objetivos de investigación</strong> indican qué se pretende lograr con el estudio. Deben ser coherentes con el problema y redactarse con verbos en infinitivo que reflejen el enfoque metodológico:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Cuantitativo</strong>: determinar, medir, comparar, evaluar.</li>
+          <li><strong>Cualitativo</strong>: explorar, comprender, describir, interpretar.</li>
+        </ul>
+        <div class="definition">
+          “El objetivo general resume la intención global del estudio; los objetivos específicos descomponen esa intención en acciones concretas y medibles.” (Hernández Sampieri et al., 2014, p. 89)
+        </div>
+        <p>Se debe evitar el uso de verbos imprecisos como “conocer”, “entender” o “analizar” sin especificar el qué y el cómo. Cada objetivo específico debe poder responderse con los datos que se recolectarán.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Redacta tus objetivos</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-7" data-original="Redacta objetivos cuantitativos usando verbos como 'determinar', 'comparar', 'evaluar', 'correlacionar' para una investigación sobre [tema].">Redacta objetivos cuantitativos usando verbos como 'determinar', 'comparar', 'evaluar', 'correlacionar' para una investigación sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-7')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-7')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-7" data-original="Redacta objetivos cualitativos usando verbos como 'explorar', 'comprender', 'interpretar', 'describir' para una investigación sobre [tema].">Redacta objetivos cualitativos usando verbos como 'explorar', 'comprender', 'interpretar', 'describir' para una investigación sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-7')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-7')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-7" placeholder="Escribe aquí tus objetivos de investigación..."></textarea>
+      </div>
+    </div>
+
+    <!-- Días 8 al 30: mantenemos el contenido original (sin IA por brevedad, pero puedes añadir fácilmente) -->
+        <!-- Lección 8: Antecedentes del estudio -->
+    <div class="lesson-content" id="lesson-8">
+      <div class="lesson-header"><h2>Día 8: Antecedentes del estudio</h2></div>
+      <div class="lesson-text">
+        <p>Los <strong>antecedentes</strong> son investigaciones previas relacionadas con el tema de estudio. Su revisión permite identificar vacíos, tendencias, líneas de trabajo y errores a evitar. Hernández Sampieri et al. (2014) recomiendan organizarlos de forma temática o cronológica, no como una lista descriptiva.</p>
+        <p>Un buen estado del arte no resume estudios aislados, sino que ofrece una <em>síntesis crítica</em> que justifica la pertinencia del nuevo estudio. Por ejemplo: “Si bien varios autores han estudiado el estrés académico (González, 2020; López, 2022), ninguno ha explorado las estrategias de autocuidado desde una perspectiva cualitativa en contextos post-pandémicos”.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Resume antecedentes relevantes</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-8" data-original="Busca antecedentes empíricos cuantitativos sobre [tema] que hayan utilizado diseños similares, muestras comparables o variables equivalentes.">Busca antecedentes empíricos cuantitativos sobre [tema] que hayan utilizado diseños similares, muestras comparables o variables equivalentes.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-8')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-8')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-8" data-original="Identifica estudios cualitativos previos sobre [tema] que hayan explorado experiencias similares, contextos análogos o marcos teóricos afines.">Identifica estudios cualitativos previos sobre [tema] que hayan explorado experiencias similares, contextos análogos o marcos teóricos afines.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-8')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-8')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-8" placeholder="Escribe aquí tus antecedentes clave..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 9: Paradigmas -->
+    <div class="lesson-content" id="lesson-9">
+      <div class="lesson-header"><h2>Día 9: Paradigmas</h2></div>
+      <div class="lesson-text">
+        <p>Un <strong>paradigma</strong> es un marco filosófico que guía la forma en que se entiende la realidad y se produce conocimiento. Los principales son:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Positivista</strong>: asume una realidad objetiva, externa y medible (asociado al enfoque cuantitativo).</li>
+          <li><strong>Interpretativo</strong>: considera la realidad como subjetiva y construida socialmente (asociado al enfoque cualitativo).</li>
+          <li><strong>Crítico</strong>: ve el conocimiento como herramienta para transformar injusticias sociales (asociado a enfoques cualitativos o mixtos con compromiso político).</li>
+        </ul>
+        <p>Guba y Lincoln (1994) subrayan que la elección del paradigma debe ser explícita y coherente con todo el diseño investigativo. No se trata de una elección estética, sino epistemológica.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Justifica tu paradigma</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-9" data-original="Explica cómo el paradigma positivista/post-positivista sustenta una investigación cuantitativa sobre [tema].">Explica cómo el paradigma positivista/post-positivista sustenta una investigación cuantitativa sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-9')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-9')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-9" data-original="Describe cómo el paradigma interpretativo/constructivista orienta una investigación cualitativa sobre [tema].">Describe cómo el paradigma interpretativo/constructivista orienta una investigación cualitativa sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-9')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-9')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-9" placeholder="Reflexiona sobre tu paradigma..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 10: Fundamentación -->
+    <div class="lesson-content" id="lesson-10">
+      <div class="lesson-header"><h2>Día 10: Fundamentación</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>fundamentación teórica</strong> integra teorías, modelos y conceptos que permiten comprender, explicar o interpretar el fenómeno de estudio. Bisquerra (2009) insiste en que no se trata de citar autores famosos, sino de seleccionar aquellos cuyas categorías sean <em>funcionales</em> para el análisis.</p>
+        <p>Por ejemplo, si se estudia el autocuidado emocional, la Teoría de la Regulación Emocional de Gross (2015) es más útil que una teoría general sobre salud mental. La fundamentación debe ser selectiva, pertinente y alineada con los objetivos.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Desarrolla tu fundamentación</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-10" data-original="Desarrolla una fundamentación que justifique la necesidad de medir y generalizar hallazgos sobre [tema] en [área].">Desarrolla una fundamentación que justifique la necesidad de medir y generalizar hallazgos sobre [tema] en [área].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-10')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-10')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-10" data-original="Elabora una fundamentación que destaque la importancia de comprender en profundidad las experiencias o significados en torno a [tema].">Elabora una fundamentación que destaque la importancia de comprender en profundidad las experiencias o significados en torno a [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-10')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-10')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-10" placeholder="Escribe aquí tu fundamentación..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 11: Marco teórico -->
+    <div class="lesson-content" id="lesson-11">
+      <div class="lesson-header"><h2>Día 11: Marco teórico</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>marco teórico</strong> es la sección del protocolo donde se presenta la fundamentación de manera organizada y narrativa. Según Hernández Sampieri et al. (2014), cumple cuatro funciones clave:</p>
+        <ol style="margin: 15px 0 20px 30px;">
+          <li>Evita errores del pasado.</li>
+          <li>Orienta la formulación de hipótesis o preguntas.</li>
+          <li>Guía la selección de métodos y técnicas.</li>
+          <li>Proporciona un referente para interpretar los resultados.</li>
+        </ol>
+        <p>Debe estructurarse en dimensiones temáticas (no por autor), integrar fuentes y vincular explícitamente cada teoría con el problema de investigación.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Construye tu marco teórico</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-11" data-original="Selecciona teorías que permitan formular hipótesis comprobables sobre [tema] en [área], con énfasis en modelos causales o predictivos.">Selecciona teorías que permitan formular hipótesis comprobables sobre [tema] en [área], con énfasis en modelos causales o predictivos.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-11')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-11')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-11" data-original="Propón teorías o marcos conceptuales que ayuden a interpretar sentidos, prácticas o dinámicas sociales relacionadas con [tema].">Propón teorías o marcos conceptuales que ayuden a interpretar sentidos, prácticas o dinámicas sociales relacionadas con [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-11')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-11')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-11" placeholder="Escribe aquí tu marco teórico..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 12: Síntesis de antecedentes -->
+    <div class="lesson-content" id="lesson-12">
+      <div class="lesson-header"><h2>Día 12: Síntesis de antecedentes</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>síntesis de antecedentes</strong> va más allá de la descripción individual de estudios. Consiste en identificar patrones, contradicciones, evolución conceptual y lagunas en la literatura. Por ejemplo:</p>
+        <div class="definition">
+          “Entre 2018 y 2022, predominaron estudios cuantitativos sobre estrés académico en Latinoamérica (Martínez, 2019; Rojas, 2021), pero desde 2023 se observa un giro hacia enfoques cualitativos que exploran estrategias de afrontamiento (Silva, 2023). Sin embargo, persiste la ausencia de investigaciones centradas en el autocuidado como recurso preventivo.” 
+        </div>
+        <p>Esta síntesis justifica la originalidad y pertinencia del nuevo estudio.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Sintetiza la literatura</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-12" data-original="Sintetiza los hallazgos clave de los antecedentes cuantitativos en [área] sobre [tema], destacando brechas que justifiquen mi estudio.">Sintetiza los hallazgos clave de los antecedentes cuantitativos en [área] sobre [tema], destacando brechas que justifiquen mi estudio.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-12')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-12')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-12" data-original="Sintetiza los hallazgos clave de los antecedentes cualitativos en [área] sobre [tema], identificando vacíos en la comprensión de experiencias o contextos.">Sintetiza los hallazgos clave de los antecedentes cualitativos en [área] sobre [tema], identificando vacíos en la comprensión de experiencias o contextos.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-12')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-12')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-12" placeholder="Escribe aquí tu síntesis..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 13: Operacionalización -->
+    <div class="lesson-content" id="lesson-13">
+      <div class="lesson-header"><h2>Día 13: Operacionalización</h2></div>
+      <div class="lesson-text">
+        <p>En estudios <strong>cuantitativos</strong>, los conceptos abstractos del marco teórico deben <em>operacionalizarse</em> en variables medibles. Por ejemplo, el concepto “bienestar emocional” puede operacionalizarse como “puntuación en la Escala de Bienestar Psicológico de Ryff (1989)”.</p>
+        <p>En estudios <strong>cualitativos</strong>, se definen <em>dimensiones analíticas</em> que guiarán la codificación. Por ejemplo, “estrategias de autocuidado” podría desglosarse en: 1) físicas, 2) emocionales, 3) sociales.</p>
+        <p>Esta operacionalización permite pasar de lo conceptual a lo empírico de forma rigurosa.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Opera tus constructos</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-13" data-original="Operacionaliza las variables [nombre] para un estudio cuantitativo en [área], incluyendo dimensiones, indicadores y escalas de medición.">Operacionaliza las variables [nombre] para un estudio cuantitativo en [área], incluyendo dimensiones, indicadores y escalas de medición.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-13')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-13')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-13" data-original="Desarrolla un sistema de categorías analíticas para codificar datos cualitativos sobre [tema], con ejemplos y reglas de inclusión.">Desarrolla un sistema de categorías analíticas para codificar datos cualitativos sobre [tema], con ejemplos y reglas de inclusión.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-13')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-13')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-13" placeholder="Escribe aquí tu operacionalización..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 14: Redacción del marco -->
+    <div class="lesson-content" id="lesson-14">
+      <div class="lesson-header"><h2>Día 14: Redacción del marco</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>redacción del marco teórico</strong> debe ser narrativa, no enumerativa. Se recomienda una estructura de tres partes:</p>
+        <ol style="margin: 15px 0 20px 30px;">
+          <li><strong>Introducción al marco</strong>: presenta el tema central y anuncia las dimensiones.</li>
+          <li><strong>Desarrollo temático</strong>: integra autores por conceptos, no por citas aisladas.</li>
+          <li><strong>Cierre integrador</strong>: resume cómo el marco sustenta la investigación y señala el vacío que aborda.</li>
+        </ol>
+        <p>El texto debe usar voz activa (“Este estudio se basa en…”), citar en APA y evitar el plagio mediante paráfrasis rigurosa.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Organiza tu marco</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-14" data-original="Organiza un marco teórico coherente para mi estudio cuantitativo sobre [tema], integrando autores clave, definiciones y relaciones conceptuales.">Organiza un marco teórico coherente para mi estudio cuantitativo sobre [tema], integrando autores clave, definiciones y relaciones conceptuales.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-14')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-14')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-14" data-original="Construye un marco teórico para mi estudio cualitativo sobre [tema], integrando perspectivas interpretativas que enriquezcan la comprensión del fenómeno.">Construye un marco teórico para mi estudio cualitativo sobre [tema], integrando perspectivas interpretativas que enriquezcan la comprensión del fenómeno.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-14')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-14')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-14" placeholder="Escribe aquí tu redacción..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 15: Diseño metodológico -->
+    <div class="lesson-content" id="lesson-15">
+      <div class="lesson-header"><h2>Día 15: Diseño metodológico</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>diseño metodológico</strong> describe de forma coherente y detallada cómo se llevará a cabo la investigación. Incluye:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>Tipo y enfoque del estudio</li>
+          <li>Población y muestra</li>
+          <li>Técnicas e instrumentos</li>
+          <li>Procedimientos y análisis</li>
+        </ul>
+        <p>Hernández Sampieri et al. (2014) subrayan que el diseño debe ser coherente con los objetivos y el marco teórico. No basta con listar elementos; hay que justificar cada decisión metodológica.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Diseña tu metodología</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-15" data-original="Detalla el diseño cuantitativo: tipo de muestreo (aleatorio, estratificado), tamaño calculado, instrumentos validados, y pruebas estadísticas para [tema].">Detalla el diseño cuantitativo: tipo de muestreo (aleatorio, estratificado), tamaño calculado, instrumentos validados, y pruebas estadísticas para [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-15')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-15')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-15" data-original="Describe el diseño cualitativo: estrategia de muestreo (intencional, bola de nieve), criterios de saturación, técnicas (entrevistas, observación), y proceso de análisis (codificación, triangulación).">Describe el diseño cualitativo: estrategia de muestreo (intencional, bola de nieve), criterios de saturación, técnicas (entrevistas, observación), y proceso de análisis (codificación, triangulación).</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-15')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-15')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-15" placeholder="Escribe aquí tu diseño..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 16: Población y muestra -->
+    <div class="lesson-content" id="lesson-16">
+      <div class="lesson-header"><h2>Día 16: Población y muestra</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>universo</strong> es el conjunto total de elementos; la <strong>población</strong>, el grupo accesible; la <strong>muestra</strong>, el subconjunto seleccionado.</p>
+        <p>En estudios <strong>cuantitativos</strong>, se busca representatividad mediante muestreo probabilístico (aleatorio, estratificado). En <strong>cualitativos</strong>, se prioriza la riqueza informativa mediante muestreo intencional o por saturación (Creswell, 2013).</p>
+        <p>La técnica debe justificarse según los recursos, el acceso y los objetivos del estudio.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Define tu muestra</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-16" data-original="Calcula el tamaño de muestra necesario para un estudio cuantitativo sobre [tema] con un nivel de confianza del 95% y margen de error del 5%.">Calcula el tamaño de muestra necesario para un estudio cuantitativo sobre [tema] con un nivel de confianza del 95% y margen de error del 5%.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-16')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-16')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-16" data-original="Justifica la estrategia de muestreo intencional para un estudio cualitativo sobre [fenómeno], especificando criterios de selección y estimación de saturación.">Justifica la estrategia de muestreo intencional para un estudio cualitativo sobre [fenómeno], especificando criterios de selección y estimación de saturación.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-16')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-16')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-16" placeholder="Escribe aquí tu muestra..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 17: Ética en investigación -->
+    <div class="lesson-content" id="lesson-17">
+      <div class="lesson-header"><h2>Día 17: Ética en investigación</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>ética en investigación</strong> se basa en tres principios fundamentales (Declaración de Helsinki, CIOMS):</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Respeto por las personas</strong>: autonomía y consentimiento informado.</li>
+          <li><strong>Beneficencia</strong>: maximizar beneficios, minimizar riesgos.</li>
+          <li><strong>Justicia</strong>: distribución equitativa de cargas y beneficios.</li>
+        </ul>
+        <p>El <strong>consentimiento informado</strong> debe ser claro, voluntario y revocable en cualquier momento. Los datos deben protegerse mediante anonimización y almacenamiento seguro.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Elabora tu sección ética</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-17" data-original="Elabora una sección sobre consideraciones éticas para una investigación cuantitativa sobre [tema], incluyendo consentimiento, confidencialidad y manejo de datos sensibles.">Elabora una sección sobre consideraciones éticas para una investigación cuantitativa sobre [tema], incluyendo consentimiento, confidencialidad y manejo de datos sensibles.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-17')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-17')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-17" data-original="Describe las consideraciones éticas críticas en un estudio cualitativo con [grupo vulnerable], destacando relación investigador-participante y devolución de resultados.">Describe las consideraciones éticas críticas en un estudio cualitativo con [grupo vulnerable], destacando relación investigador-participante y devolución de resultados.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-17')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-17')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-17" placeholder="Escribe aquí tus consideraciones éticas..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 18: Análisis de resultados -->
+    <div class="lesson-content" id="lesson-18">
+      <div class="lesson-header"><h2>Día 18: Análisis de resultados</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>análisis de resultados</strong> depende del enfoque:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Cuantitativo</strong>: estadística descriptiva (frecuencias, promedios) e inferencial (pruebas de hipótesis, correlaciones).</li>
+          <li><strong>Cualitativo</strong>: codificación temática, análisis narrativo, triangulación.</li>
+        </ul>
+        <p>El método de análisis debe definirse <em>antes</em> de recolectar los datos, no después. Esto evita sesgos y fortalece la validez del estudio (Hernández Sampieri et al., 2014).</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Planifica tu análisis</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-18" data-original="Recomienda pruebas estadísticas (t-student, ANOVA, regresión, etc.) y software (SPSS, R) para analizar mis datos cuantitativos sobre [variables].">Recomienda pruebas estadísticas (t-student, ANOVA, regresión, etc.) y software (SPSS, R) para analizar mis datos cuantitativos sobre [variables].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-18')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-18')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-18" data-original="Propón un flujo de análisis cualitativo: transcripción, codificación abierta/axial/selectiva, uso de software (NVivo, Dedoose), y construcción de narrativas.">Propón un flujo de análisis cualitativo: transcripción, codificación abierta/axial/selectiva, uso de software (NVivo, Dedoose), y construcción de narrativas.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-18')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-18')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-18" placeholder="Escribe aquí tu plan de análisis..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 19: Discusión -->
+    <div class="lesson-content" id="lesson-19">
+      <div class="lesson-header"><h2>Día 19: Discusión</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>discusión</strong> interpreta los resultados a la luz del marco teórico y los antecedentes. No se limita a repetir hallazgos, sino a:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>Explicar su significado</li>
+          <li>Comparar con otros estudios</li>
+          <li>Reconocer limitaciones</li>
+          <li>Proponer líneas futuras</li>
+        </ul>
+        <p>Es el espacio donde el investigador demuestra su capacidad crítica, reflexiva y teórica. Una buena discusión conecta los hallazgos con el problema inicial y contribuye al campo de conocimiento.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Escribe tu discusión</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-19" data-original="Interpreta hipotéticamente un resultado estadístico significativo/no significativo en mi estudio cuantitativo sobre [tema], comparándolo con la literatura.">Interpreta hipotéticamente un resultado estadístico significativo/no significativo en mi estudio cuantitativo sobre [tema], comparándolo con la literatura.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-19')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-19')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-19" data-original="Ayúdame a discutir un hallazgo cualitativo emergente (ej. 'resiliencia comunitaria') en relación con teorías existentes y su relevancia práctica.">Ayúdame a discutir un hallazgo cualitativo emergente (ej. 'resiliencia comunitaria') en relación con teorías existentes y su relevancia práctica.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-19')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-19')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-19" placeholder="Escribe aquí tu discusión..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 20: Validez y rigor -->
+    <div class="lesson-content" id="lesson-20">
+      <div class="lesson-header"><h2>Día 20: Validez y rigor</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>rigor metodológico</strong> se garantiza mediante estrategias específicas:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Cuantitativo</strong>: validez (mide lo que dice medir) y confiabilidad (consistencia interna, Alfa de Cronbach > 0.70).</li>
+          <li><strong>Cualitativo</strong>: credibilidad (triangulación, revisión por participantes), transferibilidad (descripción densa), dependencia (diario de campo) y confirmabilidad (reflexividad) (Lincoln & Guba, 1985).</li>
+        </ul>
+        <p>Estas estrategias deben describirse en el protocolo para demostrar la calidad del diseño.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Justifica tu rigor</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-20" data-original="Describe las estrategias para garantizar la validez y confiabilidad en mi estudio cuantitativo sobre [tema], incluyendo prueba piloto y consistencia interna.">Describe las estrategias para garantizar la validez y confiabilidad en mi estudio cuantitativo sobre [tema], incluyendo prueba piloto y consistencia interna.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-20')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-20')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-20" data-original="Explica cómo garantizarás la credibilidad, transferibilidad y confirmabilidad en mi estudio cualitativo sobre [fenómeno], usando triangulación y diario de campo.">Explica cómo garantizarás la credibilidad, transferibilidad y confirmabilidad en mi estudio cualitativo sobre [fenómeno], usando triangulación y diario de campo.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-20')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-20')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-20" placeholder="Escribe aquí tu plan de rigor..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 21: Instrumentos -->
+    <div class="lesson-content" id="lesson-21">
+      <div class="lesson-header"><h2>Día 21: Instrumentos</h2></div>
+      <div class="lesson-text">
+        <p>Los <strong>instrumentos de recolección</strong> deben ser descritos con precisión:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Cuantitativo</strong>: encuestas, escalas validadas (indicar autor, año, número de ítems, escala de respuesta).</li>
+          <li><strong>Cualitativo</strong>: guías de entrevista (preguntas centrales, de profundización), protocolos de observación.</li>
+        </ul>
+        <p>Si se adaptan instrumentos existentes, debe citarse la fuente original y justificarse la modificación. Si se diseñan nuevos, deben someterse a revisión por pares o prueba piloto.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Diseña tus instrumentos</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-21" data-original="Diseña una escala Likert de 5 puntos para medir [variable] en [población], incluyendo ítems válidos y confiables.">Diseña una escala Likert de 5 puntos para medir [variable] en [población], incluyendo ítems válidos y confiables.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-21')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-21')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-21" data-original="Elabora una guía de entrevista semiestructurada para explorar [fenómeno] en [grupo], con preguntas abiertas y de profundización.">Elabora una guía de entrevista semiestructurada para explorar [fenómeno] en [grupo], con preguntas abiertas y de profundización.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-21')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-21')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-21" placeholder="Escribe aquí tus instrumentos..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 22: Procedimientos -->
+    <div class="lesson-content" id="lesson-22">
+      <div class="lesson-header"><h2>Día 22: Procedimientos</h2></div>
+      <div class="lesson-text">
+        <p>Los <strong>procedimientos</strong> detallan paso a paso cómo se ejecutará la investigación:</p>
+        <ol style="margin: 15px 0 20px 30px;">
+          <li>Preparación (permisos, prueba piloto)</li>
+          <li>Reclutamiento (cómo contactar participantes)</li>
+          <li>Aplicación (lugar, duración, quién aplica)</li>
+          <li>Cierre (agradecimiento, resguardo de datos)</li>
+        </ol>
+        <p>Incluir un <strong>cronograma</strong> realista y anticipar <strong>planes de contingencia</strong> para riesgos comunes (baja participación, fallas técnicas) fortalece la viabilidad del estudio.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Detalla tus procedimientos</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-22" data-original="Describe los procedimientos para aplicar una encuesta online a [población] sobre [tema], incluyendo reclutamiento, duración, y manejo de datos.">Describe los procedimientos para aplicar una encuesta online a [población] sobre [tema], incluyendo reclutamiento, duración, y manejo de datos.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-22')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-22')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-22" data-original="Describe los procedimientos para realizar entrevistas presenciales con [grupo] sobre [fenómeno], incluyendo contacto, lugar, grabación y transcripción.">Describe los procedimientos para realizar entrevistas presenciales con [grupo] sobre [fenómeno], incluyendo contacto, lugar, grabación y transcripción.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-22')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-22')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-22" placeholder="Escribe aquí tus procedimientos..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 23: Estructura del informe -->
+    <div class="lesson-content" id="lesson-23">
+      <div class="lesson-header"><h2>Día 23: Estructura del informe</h2></div>
+      <div class="lesson-text">
+        <p>El protocolo sigue la estructura <strong>IMRaD</strong> (Introducción, Métodos, Resultados, Discusión), aunque en el protocolo los últimos dos son prospectivos:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Introducción</strong>: contexto, problema, objetivos, justificación.</li>
+          <li><strong>Métodos</strong>: marco teórico, diseño, población, instrumentos, análisis.</li>
+          <li><strong>Resultados esperados</strong>: hipótesis o hallazgos anticipados.</li>
+          <li><strong>Discusión preliminar</strong>: cómo se interpretarían ciertos resultados.</li>
+        </ul>
+        <p>Esta estructura es universalmente reconocida en la comunidad científica.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Organiza tu informe</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-23" data-original="Proporciona una estructura IMRaD (Introducción, Métodos, Resultados, Discusión) adaptada a un artículo cuantitativo en [área].">Proporciona una estructura IMRaD (Introducción, Métodos, Resultados, Discusión) adaptada a un artículo cuantitativo en [área].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-23')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-23')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-23" data-original="Sugiere una estructura narrativa para un informe cualitativo que integre voces de participantes, contexto y reflexividad del investigador.">Sugiere una estructura narrativa para un informe cualitativo que integre voces de participantes, contexto y reflexividad del investigador.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-23')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-23')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-23" placeholder="Escribe aquí tu estructura..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 24: Título y resumen -->
+    <div class="lesson-content" id="lesson-24">
+      <div class="lesson-header"><h2>Día 24: Título y resumen</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>título</strong> debe incluir: fenómeno, contexto y enfoque (ej.: “Estrategias de autocuidado en estudiantes universitarios: un estudio cualitativo”).</p>
+        <p>El <strong>resumen (abstract)</strong> es un texto autónomo de 150–300 palabras que incluye:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>Contexto y problema</li>
+          <li>Objetivo</li>
+          <li>Metodología</li>
+          <li>Resultados esperados</li>
+          <li>Conclusión/relevancia</li>
+        </ul>
+        <p>Es la primera (y a veces única) parte que leerán los evaluadores. Debe ser claro, preciso y sin citas.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Redacta título y resumen</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-24" data-original="Redacta un título y resumen (150–250 palabras) para un estudio cuantitativo sobre [tema] en [contexto], siguiendo normas APA.">Redacta un título y resumen (150–250 palabras) para un estudio cuantitativo sobre [tema] en [contexto], siguiendo normas APA.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-24')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-24')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-24" data-original="Redacta un título y resumen (150–250 palabras) para un estudio cualitativo sobre [fenómeno] en [contexto], destacando enfoque y relevancia.">Redacta un título y resumen (150–250 palabras) para un estudio cualitativo sobre [fenómeno] en [contexto], destacando enfoque y relevancia.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-24')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-24')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-24" placeholder="Escribe aquí tu título y resumen..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 25: Normas APA -->
+    <div class="lesson-content" id="lesson-25">
+      <div class="lesson-header"><h2>Día 25: Normas APA</h2></div>
+      <div class="lesson-text">
+        <p>Las <strong>normas APA (7ª edición)</strong> estandarizan la presentación académica:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li><strong>Citas en el texto</strong>: (Apellido, año) o “Texto” (Apellido, año, p. XX)</li>
+          <li><strong>Lista de referencias</strong>: orden alfabético, sangría francesa, itálicas en títulos de revistas/libros</li>
+          <li><strong>Elementos visuales</strong>: Tabla 1 (arriba), Figura 1 (abajo)</li>
+        </ul>
+        <p>El uso correcto de APA refleja rigor académico y respeto por la propiedad intelectual. Herramientas como Zotero facilitan su aplicación.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Formatea en APA</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-25" data-original="Formatea las siguientes citas en el texto y referencias bibliográficas según las normas APA 7ª edición, considerando que provienen de fuentes en [tipo: libros, artículos, páginas web] en el campo de [área].">Formatea las siguientes citas en el texto y referencias bibliográficas según las normas APA 7ª edición, considerando que provienen de fuentes en [tipo: libros, artículos, páginas web] en el campo de [área].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-25')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-25')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-25" data-original="Verifica y corrige el formato APA 7ª edición de mis referencias cualitativas, prestando atención a fuentes grises, entrevistas no publicadas y documentos institucionales.">Verifica y corrige el formato APA 7ª edición de mis referencias cualitativas, prestando atención a fuentes grises, entrevistas no publicadas y documentos institucionales.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-25')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-25')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-25" placeholder="Escribe aquí tus referencias..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 26: Tablas y anexos -->
+    <div class="lesson-content" id="lesson-26">
+      <div class="lesson-header"><h2>Día 26: Tablas y anexos</h2></div>
+      <div class="lesson-text">
+        <p>Los <strong>anexos</strong> incluyen materiales complementarios:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>Consentimiento informado</li>
+          <li>Instrumentos (encuesta, guía de entrevista)</li>
+          <li>Cronograma detallado</li>
+          <li>Tabla de operacionalización</li>
+        </ul>
+        <p>Las <strong>tablas y figuras</strong> en el cuerpo del texto deben ser necesarias (no repetir lo dicho en palabras) y formateadas según APA. Cada elemento debe mencionarse en el texto (“Ver Tabla 1”).</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Prepara anexos</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-26" data-original="Genera una tabla de operacionalización de variables para mi estudio cuantitativo sobre [tema], con dimensiones, indicadores y escalas.">Genera una tabla de operacionalización de variables para mi estudio cuantitativo sobre [tema], con dimensiones, indicadores y escalas.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-26')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-26')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-26" data-original="Diseña un modelo de consentimiento informado para entrevistas cualitativas con [grupo vulnerable], incluyendo derechos y contacto del investigador.">Diseña un modelo de consentimiento informado para entrevistas cualitativas con [grupo vulnerable], incluyendo derechos y contacto del investigador.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-26')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-26')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-26" placeholder="Escribe aquí tus anexos..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 27: Coherencia global -->
+    <div class="lesson-content" id="lesson-27">
+      <div class="lesson-header"><h2>Día 27: Coherencia global</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>coherencia global</strong> verifica que todas las partes del protocolo formen un todo lógico:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>¿El problema se responde con los objetivos?</li>
+          <li>¿El marco teórico sustenta las variables/dimensiones?</li>
+          <li>¿La metodología permite cumplir los objetivos?</li>
+          <li>¿Los resultados esperados derivan de la metodología?</li>
+        </ul>
+        <p>Una cadena rota en cualquier eslabón debilita toda la investigación. Esta revisión es esencial antes de entregar el protocolo.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Revisa coherencia</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-27" data-original="Verifica la coherencia entre mi problema cuantitativo, objetivos, variables y diseño metodológico sobre [tema].">Verifica la coherencia entre mi problema cuantitativo, objetivos, variables y diseño metodológico sobre [tema].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-27')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-27')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-27" data-original="Evalúa la coherencia entre mi pregunta cualitativa, objetivos, categorías de análisis y estrategia metodológica sobre [fenómeno].">Evalúa la coherencia entre mi pregunta cualitativa, objetivos, categorías de análisis y estrategia metodológica sobre [fenómeno].</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-27')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-27')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-27" placeholder="Escribe aquí tu revisión de coherencia..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 28: Autoedición -->
+    <div class="lesson-content" id="lesson-28">
+      <div class="lesson-header"><h2>Día 28: Autoedición</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>autoedición</strong> mejora claridad, precisión y formato:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>Eliminar redundancias (“básicamente fundamental”)</li>
+          <li>Corregir pasivas innecesarias (“se realizó un estudio” → “este estudio explora”)</li>
+          <li>Unificar terminología (“participantes”, no “sujetos/individuos”)</li>
+          <li>Verificar formato APA (márgenes, interlineado, títulos)</li>
+        </ul>
+        <p>Leer en voz alta y pedir retroalimentación a un par fortalece la calidad del texto final.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Edita tu texto</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-28" data-original="Revisa y mejora la redacción de mi sección de métodos cuantitativos para mayor claridad, precisión y coherencia lógica.">Revisa y mejora la redacción de mi sección de métodos cuantitativos para mayor claridad, precisión y coherencia lógica.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-28')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-28')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-28" data-original="Revisa y mejora la redacción de mi sección de hallazgos cualitativos, asegurando riqueza narrativa y coherencia con las categorías.">Revisa y mejora la redacción de mi sección de hallazgos cualitativos, asegurando riqueza narrativa y coherencia con las categorías.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-28')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-28')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-28" placeholder="Escribe aquí tus revisiones..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 29: Diario de aprendizaje -->
+    <div class="lesson-content" id="lesson-29">
+      <div class="lesson-header"><h2>Día 29: Diario de aprendizaje</h2></div>
+      <div class="lesson-text">
+        <p>El <strong>diario de aprendizaje</strong> es un ejercicio metacognitivo que invita al estudiante a reflexionar sobre:</p>
+        <ul style="margin: 15px 0 20px 30px;">
+          <li>Sus motivaciones iniciales</li>
+          <li>Decisiones clave y sus razones</li>
+          <li>Obstáculos superados</li>
+          <li>Habilidades desarrolladas</li>
+          <li>Crecimiento como investigador/a</li>
+        </ul>
+        <p>No se entrega al comité, pero fortalece la identidad investigadora y prepara para la defensa oral. Puede cerrarse con una “carta a mi yo futuro”.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Guía tu reflexión</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-29" data-original="Ayúdame a reflexionar sobre mi proceso de aprendizaje en el diseño de un estudio cuantitativo: decisiones metodológicas, desafíos y crecimiento profesional.">Ayúdame a reflexionar sobre mi proceso de aprendizaje en el diseño de un estudio cuantitativo: decisiones metodológicas, desafíos y crecimiento profesional.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-29')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-29')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-29" data-original="Ayúdame a reflexionar sobre mi proceso de aprendizaje en el diseño de un estudio cualitativo: relación con participantes, posición del investigador y desarrollo ético.">Ayúdame a reflexionar sobre mi proceso de aprendizaje en el diseño de un estudio cualitativo: relación con participantes, posición del investigador y desarrollo ético.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-29')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-29')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-29" placeholder="Escribe aquí tu diario..."></textarea>
+      </div>
+    </div>
+
+    <!-- Lección 30: Entrega final -->
+    <div class="lesson-content" id="lesson-30">
+      <div class="lesson-header"><h2>Día 30: Entrega final</h2></div>
+      <div class="lesson-text">
+        <p>La <strong>entrega final</strong> implica:</p>
+        <ol style="margin: 15px 0 20px 30px;">
+          <li>Compilar el protocolo en PDF con portada, índice y anexos</li>
+          <li>Verificar que cumpla con las normas institucionales y APA</li>
+          <li>Generar un resumen imprimible de los 30 días (como el de este reto)</li>
+          <li>Celebrar el logro: ¡has construido un protocolo sólido, ético y viable!</li>
+        </ol>
+        <p>Recuerda: el protocolo no es el final, sino el mapa para la siguiente aventura: la ejecución de tu investigación.</p>
+      </div>
+
+      <!-- IA Prompts -->
+      <div class="ia-section">
+        <h3>Asistente de IA: Prepara tu entrega</h3>
+        <div class="ia-columns">
+          <div class="ia-column">
+            <h4>Cuantitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cuan-30" data-original="Genera una lista de verificación final para la entrega de mi protocolo cuantitativo, incluyendo coherencia, formato APA, anexos y rigor metodológico.">Genera una lista de verificación final para la entrega de mi protocolo cuantitativo, incluyendo coherencia, formato APA, anexos y rigor metodológico.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cuan-30')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cuan-30')">Restaurar</button>
+            </div>
+          </div>
+          <div class="ia-column">
+            <h4>Cualitativo</h4>
+            <textarea class="ia-prompt" id="prompt-cual-30" data-original="Genera una lista de verificación final para la entrega de mi protocolo cualitativo, incluyendo coherencia, ética, rigor y calidad narrativa.">Genera una lista de verificación final para la entrega de mi protocolo cualitativo, incluyendo coherencia, ética, rigor y calidad narrativa.</textarea>
+            <div class="btn-group">
+              <button class="btn-copy" onclick="copyText('prompt-cual-30')">Copiar</button>
+              <button class="btn-reset" onclick="resetText('prompt-cual-30')">Restaurar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-30" placeholder="Escribe aquí tu reflexión final..."></textarea>
+      </div>
+    </div>
+	
+	      <div class="notes-section">
+        <h3>Mis notas</h3>
+        <textarea id="notes-30" placeholder="Escribe aquí tu reflexión final..."></textarea>
+        <div style="margin-top: 15px;">
+          <button class="btn-copy" onclick="exportNotesToPDF()" style="background: var(--primary); padding: 8px 16px; font-size: 0.95em;">
+            📄 Exportar todas mis notas como PDF
+          </button>
+        </div>
+      </div>
 
     <!-- Navegación -->
     <div class="nav-controls">
-      <button class="nav-btn" id="prevBtn">← Anterior</button>
-      <button class="nav-btn" id="nextBtn">Siguiente →</button>
+      <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">← Anterior</button>
+      <button class="nav-btn" id="nextBtn" onclick="navigate(1)">Siguiente →</button>
     </div>
 
     <footer>
-      <p id="campusAuthors">Basado en: Hernández Sampieri et al. (2014), Creswell (2013), Bisquerra (2009), Lincoln & Guba (1985)</p>
+      <p>Basado en: Hernández Sampieri et al. (2014), Creswell (2013), Bisquerra (2009), Lincoln & Guba (1985)</p>
     </footer>
   </main>
 </div>
 
-<!-- Scripts principales -->
-<script src="js/pdf-export.js"></script>
-<script src="js/main.js"></script>
+<script>
+  let currentDay = 1;
+  const totalDays = 30;
+
+  // Inicializar
+  document.addEventListener('DOMContentLoaded', () => {
+    updateProgressBar();
+    updateNavButtons();
+    activateSidebarItem(1);
+    loadAllNotes();
+  });
+
+  function toggleModule(moduleNum) {
+    const content = document.getElementById(`module${moduleNum}`);
+    content.classList.toggle('active');
+    
+    const arrow = document.querySelector(`.module[data-module="${moduleNum}"] .module-header span:last-child`);
+    arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
+  }
+
+  function showLesson(day) {
+    document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+    document.getElementById(`lesson-${day}`).classList.add('active');
+    
+    currentDay = day;
+    updateProgressBar();
+    updateNavButtons();
+    activateSidebarItem(day);
+  }
+
+  function activateSidebarItem(day) {
+    document.querySelectorAll('.lesson-item').forEach(item => item.classList.remove('active'));
+    const currentItem = document.querySelector(`.lesson-item[data-day="${day}"]`);
+    if (currentItem) {
+      currentItem.classList.add('active');
+      const module = currentItem.closest('.module');
+      const moduleNum = module.getAttribute('data-module');
+      const content = document.getElementById(`module${moduleNum}`);
+      if (!content.classList.contains('active')) {
+        toggleModule(parseInt(moduleNum));
+      }
+    }
+  }
+
+  function updateProgressBar() {
+    const percent = ((currentDay - 1) / totalDays) * 100;
+    document.getElementById('progressBar').style.width = `${percent}%`;
+  }
+
+  function updateNavButtons() {
+    document.getElementById('prevBtn').disabled = (currentDay === 1);
+    document.getElementById('nextBtn').disabled = (currentDay === totalDays);
+  }
+
+  function navigate(direction) {
+    const newDay = currentDay + direction;
+    if (newDay >= 1 && newDay <= totalDays) {
+      showLesson(newDay);
+      document.querySelector('.content-area').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  // IA Functions
+  function copyText(id) {
+    const el = document.getElementById(id);
+    el.select();
+    document.execCommand('copy');
+    const btn = event.target;
+    const original = btn.textContent;
+    btn.textContent = '¡Copiado!';
+    setTimeout(() => btn.textContent = original, 1500);
+  }
+
+  function resetText(id) {
+    const el = document.getElementById(id);
+    el.value = el.getAttribute('data-original');
+  }
+
+  // Notas personales
+  function loadAllNotes() {
+    for (let i = 1; i <= 30; i++) {
+      const notes = localStorage.getItem(`notes-${i}`) || '';
+      const el = document.getElementById(`notes-${i}`);
+      if (el) el.value = notes;
+    }
+  }
+
+  // Guardar notas al escribir
+  document.addEventListener('input', (e) => {
+    if (e.target.id && e.target.id.startsWith('notes-')) {
+      localStorage.setItem(e.target.id, e.target.value);
+    }
+  });
+
+  // Soporte para teclas de flecha
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') navigate(-1);
+    if (e.key === 'ArrowRight') navigate(1);
+  });
+// Función para exportar todas las notas a PDF
+function exportNotesToPDF() {
+  // Cargar jsPDF desde el módulo global
+  const { jsPDF } = window.jspdf;
+
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  let yPos = 20;
+
+  // Título
+  doc.setFontSize(18);
+  doc.setTextColor(26, 54, 93); // --primary
+  doc.text("Mis Notas del Reto: Tesis en 30 Días", pageWidth / 2, yPos, { align: 'center' });
+  yPos += 15;
+
+  // Fecha
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-ES', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  doc.setFontSize(11);
+  doc.setTextColor(100, 100, 100);
+  doc.text(`Generado el: ${dateStr}`, pageWidth / 2, yPos, { align: 'center' });
+  yPos += 20;
+
+  // Recorrer las 30 notas
+  for (let day = 1; day <= 30; day++) {
+    if (yPos > 270) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    const noteText = localStorage.getItem(`notes-${day}`) || "(Sin notas)";
+    if (noteText.trim() === "") continue;
+
+    // Título del día
+    doc.setFontSize(12);
+    doc.setTextColor(42, 115, 176); // --secondary
+    doc.text(`Día ${day}:`, margin, yPos);
+    yPos += 8;
+
+    // Contenido de la nota
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    const splitText = doc.splitTextToSize(noteText, pageWidth - 2 * margin);
+    doc.text(splitText, margin, yPos);
+    yPos += (splitText.length * 6) + 10; // espacio dinámico
+  }
+
+  // Guardar PDF
+  doc.save('Mis-Notas-Reto-Tesis-30-Dias.pdf');
+}
+
+</script>
 
 </body>
 </html>
