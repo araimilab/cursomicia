@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Campus: Reto Tesis en 30 Días</title>
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/styles.css">
+  <!-- Librerías externas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Configuración -->
+  <script src="js/config.js"></script>
+  <!-- Contenido -->
+  <script src="data/lessons.js"></script>
+</head>
+<body>
+
+<!-- Barra de progreso -->
+<div class="progress-container">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<!-- Layout principal -->
+<div class="main-layout">
+  
+  <!-- Barra lateral -->
+  <aside class="sidebar" id="sidebar">
+    <!-- Se generará dinámicamente -->
+  </aside>
+
+  <!-- Contenido central -->
+  <main class="content-area">
+    <h1 class="content-title">🎓 Mini Campus: Reto Tesis en 30 Días</h1>
+    <p id="campusDescription">Presentación teórica completa para docentes y estudiantes avanzados. Basado en las referencias clásicas de metodología de la investigación.</p>
+
+    <!-- Contenido de lecciones -->
+    <div id="lessonsContainer"></div>
+
+    <!-- Navegación -->
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn">← Anterior</button>
+      <button class="nav-btn" id="nextBtn">Siguiente →</button>
+    </div>
+
+    <footer>
+      <p id="campusAuthors">Basado en: Hernández Sampieri et al. (2014), Creswell (2013), Bisquerra (2009), Lincoln & Guba (1985)</p>
+    </footer>
+  </main>
+</div>
+
+<!-- Scripts principales -->
+<script src="js/pdf-export.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>
